@@ -1,0 +1,57 @@
+#!/usr/bin/env nextflow
+
+// Run FASTQC and seqkit stats on a pair of reads belonging to a particular taxid. 
+// Assumes reads ahave been extracted by EXTRACT_READS_BY_TAXID
+process QC {
+    tag "{meta.id}"
+    cpus 1
+    container 'selkamandcci/micrite-sleuth:0.0.2'
+
+    input:
+    tuple val(meta), path(r1), path(r2)
+
+    output:
+    tuple val(meta), path("${meta.id}.stats.tsv"), emit: seqkit
+    tuple path("${meta.id}.R1_fastqc.zip"), path("${meta.id}.R2_fastqc.zip"), path("${meta.id}.R1_fastqc.html"), path("${meta.id}.R2_fastqc.html"), emit: fastqc
+
+    script:
+    """
+    set -euo pipefail
+
+    mkdir -p cache
+    mkdir -p config
+
+    export XDG_CACHE_HOME=cache
+    export MPLCONFIGDIR=config
+
+    fastqc -t ${task.cpus} --nogroup ${r1} ${r2}
+    seqkit stats --threads ${task.cpus} --tabular ${r1} ${r2} > "${meta.id}.stats.tsv"
+    """
+}
+
+
+
+process QC_EXTRACTED_READS {
+    tag "${sampleid}.${taxid}"
+    cpus 2
+    memory 512.MB
+
+    input:
+    tuple val(sampleid), val(taxid), path(fq1), path(fq2)
+
+    output:
+    tuple val(sampleid), val(taxid), path("${sampleid}.taxid_${taxid}.stats.tsv"), emit: seqkit
+    tuple path("${sampleid}.taxid_${taxid}.R1_fastqc.zip"), path("${sampleid}.taxid_${taxid}.R2_fastqc.zip"), path("${sampleid}.taxid_${taxid}.R1_fastqc.html"), path("${sampleid}.taxid_${taxid}.R2_fastqc.html"), emit: fastqc
+
+    script:
+    """
+    mkdir -p cache
+    mkdir -p config
+
+    export XDG_CACHE_HOME=cache
+    export MPLCONFIGDIR=config
+
+    fastqc --memory 512MB -t ${task.cpus} --nogroup ${fq1} ${fq2}
+    seqkit stats --threads ${task.cpus} --tabular ${fq1} ${fq2} > "${sampleid}.taxid_${taxid}.stats.tsv"
+    """
+}
