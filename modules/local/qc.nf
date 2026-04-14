@@ -24,7 +24,21 @@ process QC {
     export XDG_CACHE_HOME=cache
     export MPLCONFIGDIR=config
 
-    fastqc -t ${task.cpus} --nogroup ${r1} ${r2}
+    # Detect file extensions (supports .fastq, .fq, and gzipped versions)
+    r1_ext=\$(basename ${r1})
+    r2_ext=\$(basename ${r2})
+
+    r1_ext=\${r1_ext#*.}   # remove prefix up to first dot
+    r2_ext=\${r2_ext#*.}
+
+    r1_link="${meta.id}_R1.\${r1_ext}"
+    r2_link="${meta.id}_R2.\${r2_ext}"
+
+    # Only create symlinks if they do not already exist
+    [ -e "\${r1_link}" ] || ln -s ${r1} "\${r1_link}"
+    [ -e "\${r2_link}" ] || ln -s ${r2} "\${r2_link}"
+
+    fastqc -t ${task.cpus} --nogroup "\${r1_link}" "\${r2_link}"
     seqkit stats --threads ${task.cpus} --tabular ${r1} ${r2} > "${meta.id}.stats.tsv"
     """
 }
