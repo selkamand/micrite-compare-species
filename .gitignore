@@ -43,3 +43,4 @@ wave-tests
 x/*
 results/
 pipeline_info/
+micrite_compare_reports/
