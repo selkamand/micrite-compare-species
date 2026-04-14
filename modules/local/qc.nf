@@ -3,7 +3,7 @@
 // Run FASTQC and seqkit stats on a pair of reads belonging to a particular taxid. 
 // Assumes reads ahave been extracted by EXTRACT_READS_BY_TAXID
 process QC {
-    tag "{meta.id}"
+    tag "${meta.id}"
     cpus 1
     container 'selkamandcci/micrite-sleuth:0.0.2'
 
