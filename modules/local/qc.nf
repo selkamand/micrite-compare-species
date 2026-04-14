@@ -24,15 +24,15 @@ process QC {
     export XDG_CACHE_HOME=cache
     export MPLCONFIGDIR=config
 
-    # Detect file extensions (supports .fastq, .fq, and gzipped versions)
-    r1_ext=\$(basename ${r1})
-    r2_ext=\$(basename ${r2})
+    # Detect gzip only (ignore everything else in filename)
+    r1_suffix=""
+    r2_suffix=""
 
-    r1_ext=\${r1_ext#*.}   # remove prefix up to first dot
-    r2_ext=\${r2_ext#*.}
+    [[ "${r1}" == *.gz ]] && r1_suffix=".gz"
+    [[ "${r2}" == *.gz ]] && r2_suffix=".gz"
 
-    r1_link="${meta.id}_R1.\${r1_ext}"
-    r2_link="${meta.id}_R2.\${r2_ext}"
+    r1_link="${meta.id}_R1.fastq\${r1_suffix}"
+    r2_link="${meta.id}_R2.fastq\${r2_suffix}"
 
     # Only create symlinks if they do not already exist
     [ -e "\${r1_link}" ] || ln -s ${r1} "\${r1_link}"
