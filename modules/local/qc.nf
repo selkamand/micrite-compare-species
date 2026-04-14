@@ -12,7 +12,7 @@ process QC {
 
     output:
     tuple val(meta), path("${meta.id}.stats.tsv"), emit: seqkit
-    tuple path("${meta.id}.R1_fastqc.zip"), path("${meta.id}.R2_fastqc.zip"), path("${meta.id}.R1_fastqc.html"), path("${meta.id}.R2_fastqc.html"), emit: fastqc
+    tuple path("${meta.id}_R1_fastqc.zip"), path("${meta.id}_R2_fastqc.zip"), path("${meta.id}_R1_fastqc.html"), path("${meta.id}_R2_fastqc.html"), emit: fastqc
 
     script:
     """
