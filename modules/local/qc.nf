@@ -28,30 +28,3 @@ process QC {
     seqkit stats --threads ${task.cpus} --tabular ${r1} ${r2} > "${meta.id}.stats.tsv"
     """
 }
-
-
-
-process QC_EXTRACTED_READS {
-    tag "${sampleid}.${taxid}"
-    cpus 2
-    memory 512.MB
-
-    input:
-    tuple val(sampleid), val(taxid), path(fq1), path(fq2)
-
-    output:
-    tuple val(sampleid), val(taxid), path("${sampleid}.taxid_${taxid}.stats.tsv"), emit: seqkit
-    tuple path("${sampleid}.taxid_${taxid}.R1_fastqc.zip"), path("${sampleid}.taxid_${taxid}.R2_fastqc.zip"), path("${sampleid}.taxid_${taxid}.R1_fastqc.html"), path("${sampleid}.taxid_${taxid}.R2_fastqc.html"), emit: fastqc
-
-    script:
-    """
-    mkdir -p cache
-    mkdir -p config
-
-    export XDG_CACHE_HOME=cache
-    export MPLCONFIGDIR=config
-
-    fastqc --memory 512MB -t ${task.cpus} --nogroup ${fq1} ${fq2}
-    seqkit stats --threads ${task.cpus} --tabular ${fq1} ${fq2} > "${sampleid}.taxid_${taxid}.stats.tsv"
-    """
-}
