@@ -6,7 +6,7 @@ params {
     outdir: Path = "results"
 }
 
-include { QC } from './modules/local/qc.nf'
+include { QC_FASTQS } from './modules/local/qc.nf'
 
 
 workflow {
@@ -32,7 +32,7 @@ workflow {
             tuple([id: sample], r1, r2)
         }
 
-    ch_qc_results = QC(ch_samples)
+    ch_qc_results = QC_FASTQS(ch_samples)
 
     publish:
     seqkit = ch_qc_results.seqkit
